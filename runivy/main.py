@@ -9,6 +9,15 @@ Config.set('graphics', 'resizable', 0)
 GRAVITY = -0.5
 
 
+class RunivyObstacle(Widget):
+
+    def move(self):
+        self.x -= 4
+
+    def is_out(self):
+        return self.x + self.width <= 0
+
+
 class RunivyPlayer(Widget):
     jumping = BooleanProperty(False)
     velocity = NumericProperty(0)
@@ -36,14 +45,39 @@ class RunivyPlayer(Widget):
 
 class RunivyGame(Widget):
     player = ObjectProperty(None)
+    score = ObjectProperty(None)
+    obstacles = ListProperty([])
 
     running = True
+
+    def spawn_obstacle(self):
+        obstacle = RunivyObstacle(x=self.width, y=104)
+        self.obstacles.append(obstacle)
+        self.add_widget(obstacle)
+
+    def move_obstacles(self):
+        for obstacle in self.obstacles:
+            obstacle.move()
+            if obstacle.is_out():
+                self.remove_widget(obstacle)
+                self.obstacles.remove(obstacle)
+                self.score.text = str(int(self.score.text) + 1)
+
+    def check_obstacles(self):
+        for obstacle in self.obstacles:
+            if obstacle.collide_widget(self.player):
+                self.running = False
 
     def update(self, dt):
         if not self.running:
             return
 
         self.player.move()
+
+        self.move_obstacles()
+        if not self.obstacles:
+            self.spawn_obstacle()
+        self.check_obstacles()
 
 
 class RunivyApp(App):
