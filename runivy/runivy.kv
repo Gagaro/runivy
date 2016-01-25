@@ -1,0 +1,27 @@
+#:kivy 1.9.1
+
+<RunivyObstacle>:
+    size: 30, 80
+    canvas:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<RunivyPlayer>:
+    size: 80, 150
+    canvas:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<RunivyGame>:
+    player: player
+
+    canvas:
+        Rectangle:
+            pos: 0, 100
+            size: root.width, 4
+
+    RunivyPlayer:
+        id: player
+        pos: 40, 104
