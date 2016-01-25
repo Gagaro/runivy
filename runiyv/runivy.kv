@@ -16,11 +16,19 @@
 
 <RunivyGame>:
     player: player
+    score: score
 
     canvas:
         Rectangle:
             pos: 0, 100
             size: root.width, 4
+
+    Label:
+        id: score
+        font_size: 70
+        text: "0"
+        center_x: root.center_x
+        top: root.top - 30
 
     RunivyPlayer:
         id: player
