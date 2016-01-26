@@ -6,6 +6,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
+            source: "data/skyscraper.png"
 
 <RunivyPlayer>:
     size: 80, 150
@@ -13,6 +14,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
+            texture: self.texture
 
 <RunivyGame>:
     player: player
@@ -20,8 +22,30 @@
 
     canvas:
         Rectangle:
-            pos: 0, 100
-            size: root.width, 4
+            pos: 0, 0
+            size: root.width, 104
+            source: "data/ground.png"
+        # Sky
+        Color:
+            rgb: (0, 0.5, 1)
+        Rectangle:
+            pos: 0, 104
+            size: root.width, (root.height - 104) / 4
+        Color:
+            rgb: (0.2, 0.65, 1)
+        Rectangle:
+            pos: 0, 104 + (root.height - 104) / 4
+            size: root.width, (root.height - 104) / 4
+        Color:
+            rgb: (0.4, 0.80, 1)
+        Rectangle:
+            pos: 0, 104 + (root.height - 104) / 4 * 2
+            size: root.width, (root.height - 104) / 4
+        Color:
+            rgb: (0.6, 0.95, 1)
+        Rectangle:
+            pos: 0, 104 + (root.height - 104) / 4 * 3
+            size: root.width, (root.height - 104) / 4
 
     Label:
         id: score
