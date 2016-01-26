@@ -1,6 +1,8 @@
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
+from kivy.core.image import Image
+from kivy.graphics.texture import Texture
 from kivy.properties import ObjectProperty, ListProperty, NumericProperty, BooleanProperty
 from kivy.uix.widget import Widget
 
@@ -21,6 +23,11 @@ class RunivyObstacle(Widget):
 class RunivyPlayer(Widget):
     jumping = BooleanProperty(False)
     velocity = NumericProperty(0)
+
+    def __init__(self, *args, **kwargs):
+        super(RunivyPlayer, self).__init__(*args, **kwargs)
+        image = Image("data/dino.png")
+        self.texture = image.texture.get_region(4, 100, 79, 99)
 
     def stop(self):
         self.jumping = False
