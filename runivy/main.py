@@ -24,11 +24,6 @@ class RunivyPlayer(Widget):
     jumping = BooleanProperty(False)
     velocity = NumericProperty(0)
 
-    def __init__(self, *args, **kwargs):
-        super(RunivyPlayer, self).__init__(*args, **kwargs)
-        image = Image("data/dino.png")
-        self.texture = image.texture.get_region(4, 100, 79, 99)
-
     def stop(self):
         self.jumping = False
         self.y = 104

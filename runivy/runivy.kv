@@ -1,20 +1,20 @@
 #:kivy 1.9.1
 
 <RunivyObstacle>:
-    size: 30, 80
+    size: 15, 80
     canvas:
         Rectangle:
             pos: self.pos
             size: self.size
-            source: "data/skyscraper.png"
+            source: "atlas://data/runivy/skyscraper"
 
 <RunivyPlayer>:
-    size: 80, 150
+    size: 79, 99
     canvas:
         Rectangle:
             pos: self.pos
             size: self.size
-            texture: self.texture
+            source: "atlas://data/runivy/dino-run-1"
 
 <RunivyGame>:
     player: player
@@ -24,7 +24,7 @@
         Rectangle:
             pos: 0, 0
             size: root.width, 104
-            source: "data/ground.png"
+            source: "atlas://data/runivy/ground"
         # Sky
         Color:
             rgb: (0, 0.5, 1)
