@@ -1,9 +1,7 @@
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
-from kivy.core.image import Image
-from kivy.graphics.texture import Texture
-from kivy.properties import ObjectProperty, ListProperty, NumericProperty, BooleanProperty
+from kivy.properties import ObjectProperty, ListProperty, NumericProperty, BooleanProperty, StringProperty
 from kivy.uix.widget import Widget
 
 Config.set('graphics', 'resizable', 0)
@@ -23,13 +21,33 @@ class RunivyObstacle(Widget):
 class RunivyPlayer(Widget):
     jumping = BooleanProperty(False)
     velocity = NumericProperty(0)
+    source = StringProperty("atlas://data/runivy/dino-run-1")
+
+    # Used to animate our widget
+    frame_per_picture = 9
+    current_animation_frame = 0
+    animation = [
+        "atlas://data/runivy/dino-run-1",
+        "atlas://data/runivy/dino-run-2",
+        "atlas://data/runivy/dino-run-3",
+        "atlas://data/runivy/dino-run-2",
+    ]
 
     def stop(self):
         self.jumping = False
         self.y = 104
         self.velocity = 0
 
+    def _update_source(self):
+        if self.jumping:
+            self.source = "atlas://data/runivy/dino-jump"
+        else:
+            current_picture = int(self.current_animation_frame / self.frame_per_picture)
+            self.source = self.animation[current_picture]
+            self.current_animation_frame = (self.current_animation_frame + 1) % (self.frame_per_picture * len(self.animation))
+
     def move(self):
+        self._update_source()
         self.y += self.velocity
         self.velocity += GRAVITY
         if self.y < 104:
