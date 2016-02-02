@@ -35,6 +35,14 @@ class RunivySkyscraper(RunivyObject):
     obstacle = True
 
 
+class RunivyNuclearSilo(RunivyObject):
+    obstacle = True
+
+
+class RunivyPhoneTower(RunivyObject):
+    obstacle = True
+
+
 class RunivyPlayer(Widget):
     jumping = BooleanProperty(False)
     velocity = NumericProperty(0)
@@ -89,6 +97,8 @@ class RunivyGame(Widget):
 
     running = True
     next_cloud = 0
+    next_obstacle = 0
+    obstacles = [RunivySkyscraper, RunivyNuclearSilo, RunivyPhoneTower]
 
     def __init__(self, **kwargs):
         super(RunivyGame, self).__init__(**kwargs)
@@ -96,12 +106,13 @@ class RunivyGame(Widget):
         self.ground.wrap = "repeat"
 
     def should_spawn_obstacle(self):
-        return not [obj for obj in self.objects if obj.obstacle]
+        return self.next_obstacle <= 0
 
     def spawn_obstacle(self):
-        obstacle = RunivySkyscraper(x=self.width, y=104)
+        obstacle = random.choice(self.obstacles)(x=self.width, y=104)
         self.objects.append(obstacle)
         self.add_widget(obstacle)
+        self.next_obstacle = random.randint(60, 180)
 
     def spawn_cloud(self):
         top = self.height - random.randint(100, 400)
@@ -120,7 +131,6 @@ class RunivyGame(Widget):
                 if obj.obstacle:
                     self.score.text = str(int(self.score.text) + 1)
         self.scroll = (self.scroll * self.width + 4) % self.width / self.width
-        #print(self.scroll)
 
     def check_obstacles(self):
         for obj in self.objects:
@@ -141,6 +151,7 @@ class RunivyGame(Widget):
             self.spawn_cloud()
         else:
             self.next_cloud -= 1
+        self.next_obstacle -= 1
 
 
 class RunivyApp(App):
