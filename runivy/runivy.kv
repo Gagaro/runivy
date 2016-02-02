@@ -1,12 +1,23 @@
 #:kivy 1.9.1
 
-<RunivyObstacle>:
+<RunivySkyscraper>:
+    speed: 4
     size: 15, 80
     canvas:
         Rectangle:
             pos: self.pos
             size: self.size
             source: "atlas://data/runivy/skyscraper"
+
+
+<RunivyCloud>:
+    size: 100, 50
+    canvas:
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: "atlas://data/runivy/cloud"
+
 
 <RunivyPlayer>:
     size: 79, 99
@@ -20,11 +31,12 @@
     player: player
     score: score
 
-    canvas:
+    canvas.before:
         Rectangle:
             pos: 0, 0
             size: root.width, 104
-            source: "atlas://data/runivy/ground"
+            texture: self.ground
+            tex_coords: (self.scroll, 1, 1 + self.scroll, 1, 1 + self.scroll, 0, self.scroll, 0)
         # Sky
         Color:
             rgb: (0, 0.5, 1)
@@ -46,6 +58,8 @@
         Rectangle:
             pos: 0, 104 + (root.height - 104) / 4 * 3
             size: root.width, (root.height - 104) / 4
+        Color:
+            rgb: (1, 1, 1)
 
     Label:
         id: score

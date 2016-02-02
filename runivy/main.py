@@ -1,6 +1,9 @@
+import random
+
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
+from kivy.core.image import Image
 from kivy.properties import ObjectProperty, ListProperty, NumericProperty, BooleanProperty, StringProperty
 from kivy.uix.widget import Widget
 
@@ -9,13 +12,27 @@ Config.set('graphics', 'resizable', 0)
 GRAVITY = -0.5
 
 
-class RunivyObstacle(Widget):
+class RunivyObject(Widget):
+    speed = NumericProperty(0)
+    obstacle = False
+
+    def __init__(self, **kwargs):
+        super(RunivyObject, self).__init__(**kwargs)
+        self.speed = kwargs.get('speed', 4)
 
     def move(self):
-        self.x -= 4
+        self.x -= self.speed
 
     def is_out(self):
         return self.x + self.width <= 0
+
+
+class RunivyCloud(RunivyObject):
+    pass
+
+
+class RunivySkyscraper(RunivyObject):
+    obstacle = True
 
 
 class RunivyPlayer(Widget):
@@ -66,26 +83,48 @@ class RunivyPlayer(Widget):
 class RunivyGame(Widget):
     player = ObjectProperty(None)
     score = ObjectProperty(None)
-    obstacles = ListProperty([])
+    objects = ListProperty([])
+    ground = ObjectProperty(None)
+    scroll = NumericProperty(0.0)
 
     running = True
+    next_cloud = 0
+
+    def __init__(self, **kwargs):
+        super(RunivyGame, self).__init__(**kwargs)
+        self.ground = Image('data/ground.png').texture
+        self.ground.wrap = "repeat"
+
+    def should_spawn_obstacle(self):
+        return not [obj for obj in self.objects if obj.obstacle]
 
     def spawn_obstacle(self):
-        obstacle = RunivyObstacle(x=self.width, y=104)
-        self.obstacles.append(obstacle)
+        obstacle = RunivySkyscraper(x=self.width, y=104)
+        self.objects.append(obstacle)
         self.add_widget(obstacle)
 
-    def move_obstacles(self):
-        for obstacle in self.obstacles:
-            obstacle.move()
-            if obstacle.is_out():
-                self.remove_widget(obstacle)
-                self.obstacles.remove(obstacle)
-                self.score.text = str(int(self.score.text) + 1)
+    def spawn_cloud(self):
+        top = self.height - random.randint(100, 400)
+        speed = random.randint(1, 8)
+        cloud = RunivyCloud(x=self.width, y=top, speed=speed)
+        self.objects.append(cloud)
+        self.add_widget(cloud, canvas='before')
+        self.next_cloud = random.randint(60, 180)
+
+    def move_objects(self):
+        for obj in self.objects[:]:
+            obj.move()
+            if obj.is_out():
+                self.remove_widget(obj)
+                self.objects.remove(obj)
+                if obj.obstacle:
+                    self.score.text = str(int(self.score.text) + 1)
+        self.scroll = (self.scroll * self.width + 4) % self.width / self.width
+        #print(self.scroll)
 
     def check_obstacles(self):
-        for obstacle in self.obstacles:
-            if obstacle.collide_widget(self.player):
+        for obj in self.objects:
+            if obj.obstacle and obj.collide_widget(self.player):
                 self.running = False
 
     def update(self, dt):
@@ -94,10 +133,14 @@ class RunivyGame(Widget):
 
         self.player.move()
 
-        self.move_obstacles()
-        if not self.obstacles:
+        self.move_objects()
+        if self.should_spawn_obstacle():
             self.spawn_obstacle()
         self.check_obstacles()
+        if self.next_cloud <= 0:
+            self.spawn_cloud()
+        else:
+            self.next_cloud -= 1
 
 
 class RunivyApp(App):
