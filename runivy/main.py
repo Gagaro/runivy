@@ -10,7 +10,8 @@ from kivy.uix.widget import Widget
 
 Config.set('graphics', 'resizable', 0)
 
-GRAVITY = -0.5
+GRAVITY = -0.25
+FREQUENCY = 1.0 / 120.0
 
 
 class RunivyObject(Widget):
@@ -19,7 +20,7 @@ class RunivyObject(Widget):
 
     def __init__(self, **kwargs):
         super(RunivyObject, self).__init__(**kwargs)
-        self.speed = kwargs.get('speed', 4)
+        self.speed = kwargs.get('speed', 2)
 
     def move(self):
         self.x -= self.speed
@@ -89,7 +90,7 @@ class RunivyPlayer(Widget):
 
     def on_touch_down(self, touch):
         if not self.jumping:
-            self.velocity = 14.0
+            self.velocity = 10.0
             self.jumping = True
             if self.roar is None or self.roar.state is 'stop':
                 self.roar = random.choice(self.sounds)
@@ -97,8 +98,8 @@ class RunivyPlayer(Widget):
                 self.roar.play()
 
     def on_touch_up(self, touch):
-        if self.velocity > 6.0:
-            self.velocity = 6.0
+        if self.velocity > 4.0:
+            self.velocity = 4.0
 
 
 class RunivyGame(Widget):
@@ -111,6 +112,7 @@ class RunivyGame(Widget):
     button = ObjectProperty(None)
 
     running = False
+    last_tick = None
     next_cloud = 0
     next_obstacle = 0
     obstacles = [RunivySkyscraper, RunivyNuclearSilo, RunivyPhoneTower]
@@ -129,6 +131,7 @@ class RunivyGame(Widget):
             self.remove_widget(obj)
         self.objects.clear()
         self.score.text = "0"
+        self.last_tick = None
         self.running = True
         self.button.x = -5000
 
@@ -139,15 +142,15 @@ class RunivyGame(Widget):
         obstacle = random.choice(self.obstacles)(x=self.width, y=104)
         self.objects.append(obstacle)
         self.add_widget(obstacle)
-        self.next_obstacle = random.randint(60, 180)
+        self.next_obstacle = random.randint(120, 360)
 
     def spawn_cloud(self):
         top = self.height - random.randint(100, 400)
-        speed = random.randint(1, 8)
+        speed = random.randint(1, 4)
         cloud = RunivyCloud(x=self.width, y=top, speed=speed)
         self.objects.append(cloud)
         self.add_widget(cloud, canvas='before')
-        self.next_cloud = random.randint(60, 180)
+        self.next_cloud = random.randint(120, 360)
 
     def move_objects(self):
         for obj in self.objects[:]:
@@ -157,7 +160,7 @@ class RunivyGame(Widget):
                 self.objects.remove(obj)
                 if obj.obstacle:
                     self.score.text = str(int(self.score.text) + 1)
-        self.scroll = (self.scroll * self.width + 4) % self.width / self.width
+        self.scroll = (self.scroll * self.width + 2) % self.width / self.width
 
     def check_obstacles(self):
         for obj in self.objects:
@@ -165,10 +168,7 @@ class RunivyGame(Widget):
                 self.running = False
                 self.button.center_x = self.center_x
 
-    def update(self, dt):
-        if not self.running:
-            return
-
+    def tick(self):
         self.player.move()
 
         self.move_objects()
@@ -181,11 +181,23 @@ class RunivyGame(Widget):
             self.next_cloud -= 1
         self.next_obstacle -= 1
 
+    def update(self, dt):
+        if not self.running:
+            return
+
+        if self.last_tick is None:
+            self.last_tick = Clock.get_boottime()
+
+        current_tick = Clock.get_boottime() - FREQUENCY
+        while current_tick > self.last_tick:
+            self.last_tick += FREQUENCY
+            self.tick()
+
 
 class RunivyApp(App):
     def build(self):
         game = RunivyGame()
-        Clock.schedule_interval(game.update, 1.0 / 60.0)
+        Clock.schedule_interval(game.update, FREQUENCY)
         return game
 
 
