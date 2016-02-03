@@ -50,6 +50,7 @@
 <RunivyGame>:
     player: player
     score: score
+    button: button
 
     canvas.before:
         Rectangle:
@@ -87,6 +88,14 @@
         text: "0"
         center_x: root.center_x
         top: root.top - 30
+
+    Button:
+        id: button
+        font_size: 50
+        text: "Go !"
+        center_x: root.center_x
+        center_y: root.center_y
+        on_press: root.reset()
 
     RunivyPlayer:
         id: player

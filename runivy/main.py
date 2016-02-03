@@ -108,8 +108,9 @@ class RunivyGame(Widget):
     ground = ObjectProperty(None)
     scroll = NumericProperty(0.0)
     music = ObjectProperty(None)
+    button = ObjectProperty(None)
 
-    running = True
+    running = False
     next_cloud = 0
     next_obstacle = 0
     obstacles = [RunivySkyscraper, RunivyNuclearSilo, RunivyPhoneTower]
@@ -121,6 +122,15 @@ class RunivyGame(Widget):
         self.music = SoundLoader.load("data/music.mp3")
         self.music.loop = True
         self.music.play()
+
+    def reset(self):
+        self.player.stop()
+        for obj in self.objects:
+            self.remove_widget(obj)
+        self.objects.clear()
+        self.score.text = "0"
+        self.running = True
+        self.button.x = -5000
 
     def should_spawn_obstacle(self):
         return self.next_obstacle <= 0
@@ -153,6 +163,7 @@ class RunivyGame(Widget):
         for obj in self.objects:
             if obj.obstacle and obj.collide_widget(self.player):
                 self.running = False
+                self.button.center_x = self.center_x
 
     def update(self, dt):
         if not self.running:
