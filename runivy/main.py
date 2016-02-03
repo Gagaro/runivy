@@ -3,6 +3,7 @@ import random
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import Config
+from kivy.core.audio import SoundLoader
 from kivy.core.image import Image
 from kivy.properties import ObjectProperty, ListProperty, NumericProperty, BooleanProperty, StringProperty
 from kivy.uix.widget import Widget
@@ -47,6 +48,10 @@ class RunivyPlayer(Widget):
     jumping = BooleanProperty(False)
     velocity = NumericProperty(0)
     source = StringProperty("atlas://data/runivy/dino-run-1")
+    roar = ObjectProperty(None, allownone=True)
+
+    sounds = ["data/roar1.wav", "data/roar2.mp3", "data/roar3.wav", ]
+
 
     # Used to animate our widget
     frame_per_picture = 9
@@ -57,6 +62,10 @@ class RunivyPlayer(Widget):
         "atlas://data/runivy/dino-run-3",
         "atlas://data/runivy/dino-run-2",
     ]
+
+    def __init__(self, **kwargs):
+        super(RunivyPlayer, self).__init__(**kwargs)
+        self.sounds = [SoundLoader.load(sound) for sound in self.sounds]
 
     def stop(self):
         self.jumping = False
@@ -82,6 +91,10 @@ class RunivyPlayer(Widget):
         if not self.jumping:
             self.velocity = 14.0
             self.jumping = True
+            if self.roar is None or self.roar.state is 'stop':
+                self.roar = random.choice(self.sounds)
+                self.roar.seek(0)
+                self.roar.play()
 
     def on_touch_up(self, touch):
         if self.velocity > 6.0:
@@ -94,6 +107,7 @@ class RunivyGame(Widget):
     objects = ListProperty([])
     ground = ObjectProperty(None)
     scroll = NumericProperty(0.0)
+    music = ObjectProperty(None)
 
     running = True
     next_cloud = 0
@@ -104,6 +118,9 @@ class RunivyGame(Widget):
         super(RunivyGame, self).__init__(**kwargs)
         self.ground = Image('data/ground.png').texture
         self.ground.wrap = "repeat"
+        self.music = SoundLoader.load("data/music.mp3")
+        self.music.loop = True
+        self.music.play()
 
     def should_spawn_obstacle(self):
         return self.next_obstacle <= 0
